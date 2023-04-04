@@ -28,7 +28,7 @@ Eigen::Vector3d exPlb, exPbl;
 Eigen::Vector3d GravityVector;
 float filter_parameter_corner = 0.2;
 float filter_parameter_surf = 0.4;
-int IMU_Mode = 2;
+int IMU_Mode = 0;
 sensor_msgs::NavSatFix gps;
 int pushCount = 0;
 double startTime = 0;
@@ -45,8 +45,8 @@ void pubOdometry(const Eigen::Matrix4d& newPose, double& timefullCloud){
   Eigen::Matrix3d Rcurr = newPose.topLeftCorner(3, 3);
   Eigen::Quaterniond newQuat(Rcurr);
   Eigen::Vector3d newPosition = newPose.topRightCorner(3, 1);
-  laserOdometry.header.frame_id = "/world";
-  laserOdometry.child_frame_id = "/livox_frame";
+  laserOdometry.header.frame_id = "world";
+  laserOdometry.child_frame_id = "livox_frame";
   laserOdometry.header.stamp = ros::Time().fromSec(timefullCloud);
   laserOdometry.pose.pose.orientation.x = newQuat.x();
   laserOdometry.pose.pose.orientation.y = newQuat.y();
@@ -62,11 +62,11 @@ void pubOdometry(const Eigen::Matrix4d& newPose, double& timefullCloud){
   laserPose.pose = laserOdometry.pose.pose;
   laserOdoPath.header.stamp = laserOdometry.header.stamp;
   laserOdoPath.poses.push_back(laserPose);
-  laserOdoPath.header.frame_id = "/world";
+  laserOdoPath.header.frame_id = "world";
   pubLaserOdometryPath.publish(laserOdoPath);
 
-  laserOdometryTrans.frame_id_ = "/world";
-  laserOdometryTrans.child_frame_id_ = "/livox_frame";
+  laserOdometryTrans.frame_id_ = "world";
+  laserOdometryTrans.child_frame_id_ = "livox_frame";
   laserOdometryTrans.stamp_ = ros::Time().fromSec(timefullCloud);
   laserOdometryTrans.setRotation(tf::Quaternion(newQuat.x(), newQuat.y(), newQuat.z(), newQuat.w()));
   laserOdometryTrans.setOrigin(tf::Vector3(newPosition.x(), newPosition.y(), newPosition.z()));
@@ -510,7 +510,7 @@ void process(){
       }
       sensor_msgs::PointCloud2 laserCloudMsg;
       pcl::toROSMsg(*laserCloudAfterEstimate, laserCloudMsg);
-      laserCloudMsg.header.frame_id = "/world";
+      laserCloudMsg.header.frame_id = "world";
       laserCloudMsg.header.stamp.fromSec(lidar_list->front().timeStamp);
       pubFullLaserCloud.publish(laserCloudMsg);
 
